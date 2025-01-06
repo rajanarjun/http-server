@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 void close_socket(int fd)
 {
@@ -14,7 +15,6 @@ void close_socket(int fd)
     }
     printf("Socket Closed.\n");
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -41,12 +41,11 @@ int main(int argc, char *argv[])
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
     server_address.sin_family = AF_INET;
-    //server_address.sin_addr.s_addr = inet_addr(IP_ADDRESS);
     server_address.sin_port = htons(PORT);
 
     if (inet_pton(AF_INET, IP_ADDRESS, &server_address.sin_addr) <= 0)
     {
-        perror("inet_pton failed");
+        perror("[Error] inet_pton failed");
         close_socket(sfd);
         return 1;
     }
@@ -75,7 +74,28 @@ int main(int argc, char *argv[])
     }
     
     printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
-       
+
+    char *http_response = 
+    "HTTP/1.0 200 OK\r\n"
+    "Content-Type: text/html\r\n"
+    "Connection: close\r\n"
+    "\r\n"
+    "hello from arjun\n";
+
+    send(cfd, http_response, strlen(http_response), 0);
+
     close_socket(sfd);
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
