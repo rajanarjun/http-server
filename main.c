@@ -18,16 +18,16 @@ void close_socket(int fd)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 2)
     {
         perror("[Error] Please specify IP address and Port for the server");
         return 1;
     }
    
-    char *IP_ADDRESS = argv[1]; 
-    int PORT = atoi(argv[2]);
+    //char *IP_ADDRESS = argv[1]; 
+    int PORT = atoi(argv[1]);
 
-    printf("IP Address: %s\n", IP_ADDRESS);
+    //printf("IP Address: %s\n", IP_ADDRESS);
     printf("Port: %d\n", PORT);
 
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -40,15 +40,16 @@ int main(int argc, char *argv[])
 
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
+    server_address.sin_family = AF_INET;    
+    server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(PORT);
 
-    if (inet_pton(AF_INET, IP_ADDRESS, &server_address.sin_addr) <= 0)
-    {
-        perror("[Error] inet_pton failed");
-        close_socket(sfd);
-        return 1;
-    }
+    //if (inet_pton(AF_INET, IP_ADDRESS, &server_address.sin_addr) <= 0)
+    //{
+    //    perror("[Error] inet_pton failed");
+    //    close_socket(sfd);
+    //    return 1;
+    //}
 
     if (bind(sfd, (const struct sockaddr*) &server_address, sizeof(server_address)) == -1)
     {
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
         close_socket(sfd);
         return 1;
     }
-    printf("Socket bound to IP address: %s, Port: %d.\n", IP_ADDRESS, PORT);
+    printf("Socket bound to Port: %d.\n", PORT);
  
     if (listen(sfd, 5) == -1){
         perror("[Error] Failed listening on socket..");
@@ -75,14 +76,22 @@ int main(int argc, char *argv[])
     
     printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
-    char *http_response = 
-    "HTTP/1.0 200 OK\r\n"
-    "Content-Type: text/html\r\n"
-    "Connection: close\r\n"
-    "\r\n"
-    "hello from arjun\n";
+    
+    char buf[2056];
+    int byte_count = recv(cfd, buf, sizeof(buf), 0);
+    printf("Received %d bytes of data in buf\n", byte_count);
+    printf("%s",buf);
 
-    send(cfd, http_response, strlen(http_response), 0);
+    // send response only when correct http get request is made:
+    //char *http_response = 
+    //"HTTP/1.0 200 OK\r\n"
+    //"Content-Type: text/html\r\n"
+    //"Connection: close\r\n"
+    //"\r\n"
+    //"Hello from PASYBLO047\n";
+
+    //send(cfd, http_response, strlen(http_response), 0);
+
 
     close_socket(sfd);
     return 0;
