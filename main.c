@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <time.h>
 
+#define REQUEST_MAX_BYTES 1024
+
 void close_socket(int fd)
 {
     if (close(fd) == -1)
@@ -15,6 +17,15 @@ void close_socket(int fd)
     }
     printf("Socket Closed.\n");
 }
+
+char *parse_request(){
+
+}
+
+int validate_request(){
+
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -44,13 +55,6 @@ int main(int argc, char *argv[])
     server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(PORT);
 
-    //if (inet_pton(AF_INET, IP_ADDRESS, &server_address.sin_addr) <= 0)
-    //{
-    //    perror("[Error] inet_pton failed");
-    //    close_socket(sfd);
-    //    return 1;
-    //}
-
     if (bind(sfd, (const struct sockaddr*) &server_address, sizeof(server_address)) == -1)
     {
         perror("[Error] Failed to bind.");
@@ -76,11 +80,12 @@ int main(int argc, char *argv[])
     
     printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
-    
-    char buf[2056];
-    int byte_count = recv(cfd, buf, sizeof(buf), 0);
+    char *request_buffer = malloc(REQUEST_MAX_BYTES);
+    memset(request_buffer, 0, REQUEST_MAX_BYTES);
+    int byte_count = recv(cfd, request_buffer, REQUEST_MAX_BYTES, 0);
+
     printf("Received %d bytes of data in buf\n", byte_count);
-    printf("%s",buf);
+    printf("%s", request_buffer);
 
     // send response only when correct http get request is made:
     //char *http_response = 
@@ -92,7 +97,7 @@ int main(int argc, char *argv[])
 
     //send(cfd, http_response, strlen(http_response), 0);
 
-
+    free(request_buffer);
     close_socket(sfd);
     return 0;
 }
