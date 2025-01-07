@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <time.h>
+#include "request.h"
 
 #define REQUEST_MAX_BYTES 1024
 
@@ -16,14 +17,6 @@ void close_socket(int fd)
         perror("[Error] Could not close socket.");
     }
     printf("Socket Closed.\n");
-}
-
-char *parse_request(){
-
-}
-
-int validate_request(){
-
 }
 
 
@@ -84,8 +77,10 @@ int main(int argc, char *argv[])
     memset(request_buffer, 0, REQUEST_MAX_BYTES);
     int byte_count = recv(cfd, request_buffer, REQUEST_MAX_BYTES, 0);
 
-    printf("Received %d bytes of data in buf\n", byte_count);
-    printf("%s", request_buffer);
+    //printf("Received %d bytes of data in buf\n", byte_count);
+    //printf("%s", request_buffer);
+
+    parse_request(request_buffer);
 
     // send response only when correct http get request is made:
     //char *http_response = 
