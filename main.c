@@ -80,17 +80,27 @@ int main(int argc, char *argv[])
     //printf("Received %d bytes of data in buf\n", byte_count);
     //printf("%s", request_buffer);
 
-    parse_request(request_buffer);
-
+    int validity =  validate_request(request_buffer);
     // send response only when correct http get request is made:
-    //char *http_response = 
-    //"HTTP/1.0 200 OK\r\n"
-    //"Content-Type: text/html\r\n"
-    //"Connection: close\r\n"
-    //"\r\n"
-    //"Hello from PASYBLO047\n";
-
-    //send(cfd, http_response, strlen(http_response), 0);
+    if (validity == 0)
+    {
+        char *http_response = 
+        "HTTP/1.0 200 OK\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "Hello from Server\n";
+        send(cfd, http_response, strlen(http_response), 0);
+    }
+    else 
+    {
+        char *http_response = 
+        "HTTP/1.0 400 Bad Request\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+        send(cfd, http_response, strlen(http_response), 0);
+    }
 
     free(request_buffer);
     close_socket(sfd);

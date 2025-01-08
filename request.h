@@ -1,5 +1,4 @@
 
 
-void parse_request(char *request_line);
-
+int validate_request(char *request_message);
 
