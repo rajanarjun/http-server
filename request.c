@@ -56,10 +56,26 @@ int validate_request(char *request_message)
     if (result != NULL)
     {
         printf("Request-line received: %s\n", result);
+        
+        char *string_split = strtok(result, " ");
+        while (string_split != NULL ) 
+        {
+          printf("%s\n", string_split);
 
-        /*
-        validate request line here 
-        */
+          /*
+          1. if string_split in METHOD_TOKENS, save to char *method
+            - if method is "GET", return 200 ok response
+            - if another method, return 500 response
+          2. if string_split start with "/", save to char *directory
+          3. save rest of the string_split to char *request
+          4. check if request is in "HTTP/1.1" format
+          */
+
+            
+
+
+          string_split = strtok(NULL, " ");
+        }
 
         printf("Request-line valid\n");
         free(result);
