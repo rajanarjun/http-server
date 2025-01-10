@@ -19,7 +19,6 @@ void close_socket(int fd)
     printf("Socket Closed.\n");
 }
 
-
 int main(int argc, char *argv[])
 {
     if (argc != 2)

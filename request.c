@@ -5,7 +5,7 @@
 
 #define TOKENS_LENGTH 8
 
-const char *METHOD_TOKENS[TOKENS_LENGTH] = {
+char *METHOD_TOKENS[TOKENS_LENGTH] = {
                                             "OPTIONS", 
                                             "GET",
                                             "HEAD",
@@ -23,7 +23,6 @@ char *parse_request(char *request_line)
         if (token_ptr != NULL)
         {
             char *crlf = strstr(request_line, "\r\n");
-            
             if (crlf != NULL && crlf > token_ptr)
             {
                 size_t n  = crlf - token_ptr;
@@ -42,8 +41,7 @@ char *parse_request(char *request_line)
     return NULL;
 }
 
-int validate_request(char *request_message)
-{ 
+int validate_request(char *request_message) { 
     /*
     1. if no request return 1
     2. if request received validate it
@@ -52,37 +50,60 @@ int validate_request(char *request_message)
     5. if request is invalid return -1
     */
 
+    /*
+    1. if string_split in METHOD_TOKENS, save to char *method
+    - if method is "GET", return 200 ok response
+    - if another method, return 500 response
+    2. if string_split start with "/", save to char *directory
+    3. save rest of the string_split to char *request
+    4. check if request is in "HTTP/1.1" format
+    */
+
+    char *method = NULL, *uri = NULL, *http_version = NULL;
     char *result = parse_request(request_message);
-    if (result != NULL)
-    {
+
+    if (result != NULL) {
         printf("Request-line received: %s\n", result);
-        
+
         char *string_split = strtok(result, " ");
-        while (string_split != NULL ) 
-        {
-          printf("%s\n", string_split);
+        while (string_split != NULL ) {
 
-          /*
-          1. if string_split in METHOD_TOKENS, save to char *method
-            - if method is "GET", return 200 ok response
-            - if another method, return 500 response
-          2. if string_split start with "/", save to char *directory
-          3. save rest of the string_split to char *request
-          4. check if request is in "HTTP/1.1" format
-          */
+            if (method == NULL) { 
+                int i = 0;
+                while (i < TOKENS_LENGTH) {
+                    if (strcmp(string_split, METHOD_TOKENS[i]) == 0){
+                        method = METHOD_TOKENS[i];
+                        printf("METHOD: %s\n", method);
+                        break;
+                    }
+                    i++;
+                }
+            }
 
-            
+            if (uri == NULL) {
+                if (string_split[0] == '/') {
+                    uri = string_split;
+                    printf("URI: %s\n", uri);
+                }
+                else {
+                    uri = NULL;
+                }
+            }
 
-
-          string_split = strtok(NULL, " ");
+            if (http_version == NULL) {
+                if (strcmp(string_split, "HTTP/1.1") == 0) {
+                    http_version = string_split;
+                    printf("HTTP/Version: %s\n", http_version);
+                }
+            }
+            string_split = strtok(NULL, " ");
         }
 
         printf("Request-line valid\n");
         free(result);
         return 0;
     }
-    else
-    {
+    else {
         printf("No request-line received from client.\n");
         return 1;
     }
