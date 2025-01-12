@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     int validity =  validate_request(request_buffer);
     // send response only when correct http get request is made:
-    if (validity == 0)
+    if (validity == 200)
     {
         char *http_response = 
         "HTTP/1.0 200 OK\r\n"
@@ -91,7 +91,16 @@ int main(int argc, char *argv[])
         "Hello from Server\n";
         send(cfd, http_response, strlen(http_response), 0);
     }
-    else 
+    else if (validity = 501) 
+    {
+        char *http_response = 
+        "HTTP/1.0 501 Unsupported method\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+        send(cfd, http_response, strlen(http_response), 0);
+    }
+    else
     {
         char *http_response = 
         "HTTP/1.0 400 Bad Request\r\n"
