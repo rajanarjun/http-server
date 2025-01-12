@@ -46,7 +46,7 @@ int validate_request(char *request_message) {
 
     if (check_method(method) == 1) {
         printf("[Error] Unsupported method in request-line: '%s'.\n", method);
-        return 501;
+        return 400;
     }
 
     if (uri[0] != '/') {
@@ -64,7 +64,7 @@ int validate_request(char *request_message) {
         return 200; 
     } 
     else {
-        printf("Valid request but unsupported method '%s'.\n", method);
+        printf("Valid request but unsupported method: %s.\n", method);
         return 501;
     }
 }
