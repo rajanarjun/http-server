@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <time.h>
-#include "request.h"
+#include "validate.h"
 
 #define REQUEST_MAX_BYTES 1024
 
@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
     //printf("%s", request_buffer);
 
     int validity =  validate_request(request_buffer);
-    // send response only when correct http get request is made:
     if (validity == 200)
     {
         char *http_response = 
@@ -88,7 +87,8 @@ int main(int argc, char *argv[])
         "Content-Type: text/html\r\n"
         "Connection: close\r\n"
         "\r\n"
-        "Hello from Server\n";
+        "200 OK";
+        
         send(cfd, http_response, strlen(http_response), 0);
     }
     else if (validity = 501) 

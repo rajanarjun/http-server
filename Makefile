@@ -1,8 +1,8 @@
 
 all: server
 
-server: request.c main.c 
-	@gcc request.c main.c -o server
+server: validate.c main.c 
+	@gcc validate.c main.c -o server
 
 clean:
 	@echo "Removing old binary"
