@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include "validate.h"
+#include "response.h"
 
 #define REQUEST_MAX_BYTES 1024
 
@@ -17,6 +18,38 @@ void close_socket(int fd)
         perror("[Error] Could not close socket.");
     }
     printf("Socket Closed.\n");
+}
+
+void handle_client(int client_fd) {
+
+    char *request_buffer = malloc(REQUEST_MAX_BYTES);
+    int byte_count = recv(client_fd, request_buffer, REQUEST_MAX_BYTES, 0);
+    int validity = validate_request(request_buffer);
+    if (validity == 200)
+    {
+        char *http_response = generate_response();
+        send(client_fd, http_response, strlen(http_response), 0);
+        free(http_response);
+    }
+    else if (validity == 501) 
+    {
+        char *http_response = 
+        "HTTP/1.0 501 Unsupported method\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+        send(client_fd, http_response, strlen(http_response), 0);
+    }
+    else
+    {
+        char *http_response = 
+        "HTTP/1.0 400 Bad Request\r\n"
+        "Content-Type: text/html\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+        send(client_fd, http_response, strlen(http_response), 0);
+    }
+    free(request_buffer);
 }
 
 int main(int argc, char *argv[])
@@ -69,52 +102,15 @@ int main(int argc, char *argv[])
         close_socket(sfd);
         return 1;
     }
-    
     printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
-    char *request_buffer = malloc(REQUEST_MAX_BYTES);
-    memset(request_buffer, 0, REQUEST_MAX_BYTES);
-    int byte_count = recv(cfd, request_buffer, REQUEST_MAX_BYTES, 0);
-
-    //printf("Received %d bytes of data in buf\n", byte_count);
-    //printf("%s", request_buffer);
-
-    int validity =  validate_request(request_buffer);
-    if (validity == 200)
-    {
-        char *http_response = 
-        "HTTP/1.0 200 OK\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "200 OK";
-        
-        send(cfd, http_response, strlen(http_response), 0);
-    }
-    else if (validity = 501) 
-    {
-        char *http_response = 
-        "HTTP/1.0 501 Unsupported method\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n";
-        send(cfd, http_response, strlen(http_response), 0);
-    }
-    else
-    {
-        char *http_response = 
-        "HTTP/1.0 400 Bad Request\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n";
-        send(cfd, http_response, strlen(http_response), 0);
-    }
-
-    free(request_buffer);
+    handle_client(cfd);
+    
+    sleep(15);
+    close_socket(cfd);
     close_socket(sfd);
     return 0;
 }
-
 
 
 
