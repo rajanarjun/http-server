@@ -1,4 +1,7 @@
 
+char *index_html_response();
 
+char *generate_image_header();
 
-char *generate_response(); 
+char *greetings_response();
+

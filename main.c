@@ -20,36 +20,73 @@ void close_socket(int fd)
     printf("Socket Closed.\n");
 }
 
-void handle_client(int client_fd) {
+void handle_client(int sfd) {
 
     char *request_buffer = malloc(REQUEST_MAX_BYTES);
-    int byte_count = recv(client_fd, request_buffer, REQUEST_MAX_BYTES, 0);
-    int validity = validate_request(request_buffer);
-    if (validity == 200)
-    {
-        char *http_response = generate_response();
-        send(client_fd, http_response, strlen(http_response), 0);
-        free(http_response);
-    }
-    else if (validity == 501) 
-    {
-        char *http_response = 
-        "HTTP/1.0 501 Unsupported method\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n";
-        send(client_fd, http_response, strlen(http_response), 0);
-    }
-    else
-    {
-        char *http_response = 
-        "HTTP/1.0 400 Bad Request\r\n"
-        "Content-Type: text/html\r\n"
-        "Connection: close\r\n"
-        "\r\n";
-        send(client_fd, http_response, strlen(http_response), 0);
-    }
+    char *method = NULL, *uri = NULL, *http_version = NULL;
+    char *token_ptr;
+    int validity = 200;
+    struct sockaddr_in client_address;
+    socklen_t client_addr_size = sizeof(client_address);
+    int client_fd;
+
+    while (1) {
+        client_fd = accept(sfd, (struct sockaddr*) &client_address, &client_addr_size);
+        if (client_fd < 0)
+        {
+            perror("[Error] Failed to accept connection.");
+            continue;
+        }
+        int byte_count = recv(client_fd, request_buffer, REQUEST_MAX_BYTES, 0);
+        char *request_line = strtok_r(request_buffer, "\r\n", &token_ptr);
+
+        if (!request_line) {
+            char *http_response = "HTTP/1.1 400 Bad request\r\n\r\n";
+            send(client_fd, http_response, strlen(http_response), 0);
+            break;
+        }
+
+        method = strtok_r(request_line, " ", &token_ptr);
+        printf("%s\n", method);
+        uri = strtok_r(NULL, " ", &token_ptr);
+        printf("%s\n", uri);
+        http_version = strtok_r(NULL, " ", &token_ptr);
+        printf("%s\n", http_version);
+
+        if ((strcmp(uri, "/") == 0) && (validity == 200)) {
+            char *http_response = index_html_response();
+            send(client_fd, http_response, strlen(http_response), 0);
+            free(http_response);
+        }
+        else if ((strcmp(uri, "/greetings.jpg") == 0) && (validity == 200)) {
+            char *http_header = generate_image_header();
+            send(client_fd, http_header, strlen(http_header), 0);
+
+            FILE *image_file = fopen("server_root/greetings.jpg", "rb");
+            if (image_file == NULL) {
+                perror("Error opening file");
+                break;
+            }
+
+            fseek(image_file, 0L, SEEK_END);
+            unsigned long file_size = ftell(image_file);
+            fseek(image_file, 0L, SEEK_SET);
+
+            char *image_data = (char *)malloc(file_size);
+
+            size_t bytes_read = fread(image_data, 1, file_size, image_file);
+            send(client_fd, image_data, file_size, 0);
+            free(image_data);
+            fclose(image_file);
+        }
+        else {
+            char *http_response = "HTTP/1.1 400 Bad request\r\n\r\n";
+            send(client_fd, http_response, strlen(http_response), 0);
+            break;
+        }
+    }    
     free(request_buffer);
+    close_socket(client_fd);
 }
 
 int main(int argc, char *argv[])
@@ -93,21 +130,11 @@ int main(int argc, char *argv[])
         close_socket(sfd);
     }
 
-    struct sockaddr_in client_address;
-    socklen_t client_addr_size = sizeof(client_address);
-    int cfd = accept(sfd, (struct sockaddr*) &client_address, &client_addr_size);
-    if (cfd == -1)
-    {
-        perror("[Error] Failed to accept connection.");
-        close_socket(sfd);
-        return 1;
-    }
-    printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
+    //printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
-    handle_client(cfd);
+    handle_client(sfd);
     
-    sleep(15);
-    close_socket(cfd);
+    sleep(5);
     close_socket(sfd);
     return 0;
 }
