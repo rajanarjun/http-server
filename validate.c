@@ -5,15 +5,14 @@
 
 #define TOKENS_LENGTH 8
 
-char *METHOD_TOKENS[TOKENS_LENGTH] = {
-                                            "OPTIONS", 
-                                            "GET",
-                                            "HEAD",
-                                            "POST",
-                                            "PUT",
-                                            "DELETE",
-                                            "TRACE",
-                                            "CONNECT"};
+char *METHOD_TOKENS[TOKENS_LENGTH] = {"OPTIONS", 
+                                      "GET",
+                                      "HEAD",
+                                      "POST",
+                                      "PUT",
+                                      "DELETE",
+                                      "TRACE",
+                                      "CONNECT"};
 
 int check_method(const char *method) {
     for (int i = 0; i < TOKENS_LENGTH; i++) {

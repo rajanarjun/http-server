@@ -96,10 +96,7 @@ int main(int argc, char *argv[])
         return 1;
     }
    
-    //char *IP_ADDRESS = argv[1]; 
     int PORT = atoi(argv[1]);
-
-    //printf("IP Address: %s\n", IP_ADDRESS);
     printf("Port: %d\n", PORT);
 
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -128,8 +125,6 @@ int main(int argc, char *argv[])
         perror("[Error] Failed listening on socket..");
         close_socket(sfd);
     }
-
-    //printf("Connection accepted from %s:%d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
 
     handle_client(sfd);
     
