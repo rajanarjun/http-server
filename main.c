@@ -6,8 +6,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <time.h>
-#include "validate.h"
-#include "response.h"
+#include "utilities.h"
 
 #define REQUEST_MAX_BYTES 1024
 
