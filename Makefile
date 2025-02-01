@@ -1,5 +1,5 @@
 
-all: server
+all: program
 
 server: validate.c response.c main.c 
 	@gcc validate.c response.c main.c -o server

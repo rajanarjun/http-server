@@ -12,11 +12,6 @@
 
 void close_socket(int fd)
 {
-    if (close(fd) == -1)
-    {
-        perror("[Error] Could not close socket.");
-    }
-    printf("Socket Closed.\n");
 }
 
 int main(int argc, char *argv[])
@@ -67,11 +62,29 @@ int main(int argc, char *argv[])
         perror("[Error] Failed to accept connection.");
         return 5;
     }
-    printf("Accepted connection from address: %s on port: %d.\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
+    printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
+
+    char *message = malloc(REQUEST_MAX_BYTES);
+    ssize_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
+    printf("Message Received: \n%s\n", message);
+
+    free(message);
 
     sleep(5);
-    close_socket(server_fd);
-    close_socket(client_fd);
+
+    if (close(client_fd) == -1)
+    {
+        perror("[Error] Could not close client socket.");
+    }
+    printf("Client socket Closed.\n");
+
+    if (close(server_fd) == -1)
+    {
+        perror("[Error] Could not close server socket.");
+    }
+    printf("Server socket Closed.\n");
+
+
     return 0;
 }
 
