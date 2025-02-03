@@ -10,10 +10,6 @@
 
 #define REQUEST_MAX_BYTES 1024
 
-void close_socket(int fd)
-{
-}
-
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -83,7 +79,6 @@ int main(int argc, char *argv[])
         perror("[Error] Could not close server socket.");
     }
     printf("Server socket Closed.\n");
-
 
     return 0;
 }
