@@ -1,10 +1,10 @@
 
 all: program
 
-server: validate.c response.c main.c 
-	@gcc validate.c response.c main.c -o server
+program: validate.c response.c main.c 
+	@gcc validate.c response.c main.c -o program
 
 clean:
 	@echo "Removing old binary"
-	@rm server
+	@rm program
 

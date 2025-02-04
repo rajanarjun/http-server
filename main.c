@@ -38,14 +38,23 @@ int main(int argc, char *argv[])
     if (bind(server_fd, (const struct sockaddr*) &server_address, sizeof(server_address)) == -1)
     {
         perror("[Error] Failed to bind.");
-        close_socket(server_fd);
+        if (close(server_fd) == -1)
+        {
+            perror("[Error] Could not close server socket.");
+        }
+        printf("Server socket Closed.\n");
         return 3;
     }
     printf("Socket bound to Port: %d.\n", PORT);
  
-    if (listen(server_fd, 5) == -1){
+    if (listen(server_fd, 5) == -1)
+    {
         perror("[Error] Failed listening on socket..");
-        close_socket(server_fd);
+        if (close(server_fd) == -1)
+        {
+            perror("[Error] Could not close server socket.");
+        }
+        printf("Server socket Closed.\n");
         return 4;
     }
 
@@ -62,11 +71,13 @@ int main(int argc, char *argv[])
 
     char *message = malloc(REQUEST_MAX_BYTES);
     ssize_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
-    printf("Message Received: \n%s\n", message);
+
+    char *req = message;
+    char *tkn = strtok_r(req, "\r\n", &req);
+    printf("Request Received: %s\n", tkn);
 
     free(message);
-
-    sleep(5);
+    sleep(2);
 
     if (close(client_fd) == -1)
     {
