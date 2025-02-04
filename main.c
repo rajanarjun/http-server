@@ -68,13 +68,12 @@ int main(int argc, char *argv[])
         return 4;
     }
 
-    int client_fd;
     struct sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
 
     while (1)
     {
-        client_fd = accept(server_fd, (struct sockaddr*) &client_address, &client_address_size);
+        int client_fd = accept(server_fd, (struct sockaddr*) &client_address, &client_address_size);
         if (client_fd == -1)
         {
             perror("[Error] Failed to accept connection.");
@@ -95,13 +94,12 @@ int main(int argc, char *argv[])
         char *req = strtok_r(temp, "\r\n", &temp);
         printf("Request Received: %s\n", req);
 
+        int status_code = process_response(client_fd, req);
+        printf("Response Sent: %d\n", status_code);
     }
 
     sleep(2);
-
-    close_client_socket(client_fd);
     close_server_socket(server_fd);
-
     return 0;
 }
 

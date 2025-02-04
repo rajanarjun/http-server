@@ -3,6 +3,21 @@
 #include <stdlib.h>
 #include "utilities.h"
 
+int process_response(int cfd, char *request_line)
+{
+    char *token_ptr;
+    char *temp = request_line;
+
+    char *method = strtok_r(temp, " ", &token_ptr);
+    char *url = strtok_r(NULL, " ", &token_ptr);
+    char *http_ver = strtok_r(NULL, " ", &token_ptr);
+
+    printf("Method: %s, URL: %s, HTTP Version: %s.\n", method, url, http_ver);
+    return 200;
+}
+
+
+
 char *index_html_response() {
 
     const char *http_header = "HTTP/1.0 200 OK\r\n"
