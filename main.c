@@ -10,6 +10,24 @@
 
 #define REQUEST_MAX_BYTES 1024
 
+void close_client_socket(int cfd)
+{
+    if (close(cfd) == -1)
+    {
+        perror("[Error] Could not close client socket.");
+    }
+    printf("Client socket closed.\n");
+}
+
+void close_server_socket(int sfd)
+{
+    if (close(sfd) == -1)
+    {
+        perror("[Error] Could not close server socket.");
+    }
+    printf("Server socket closed.\n");
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -38,11 +56,7 @@ int main(int argc, char *argv[])
     if (bind(server_fd, (const struct sockaddr*) &server_address, sizeof(server_address)) == -1)
     {
         perror("[Error] Failed to bind.");
-        if (close(server_fd) == -1)
-        {
-            perror("[Error] Could not close server socket.");
-        }
-        printf("Server socket Closed.\n");
+        close_server_socket(server_fd);
         return 3;
     }
     printf("Socket bound to Port: %d.\n", PORT);
@@ -50,46 +64,43 @@ int main(int argc, char *argv[])
     if (listen(server_fd, 5) == -1)
     {
         perror("[Error] Failed listening on socket..");
-        if (close(server_fd) == -1)
-        {
-            perror("[Error] Could not close server socket.");
-        }
-        printf("Server socket Closed.\n");
+        close_server_socket(server_fd);
         return 4;
     }
 
+    int client_fd;
     struct sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
 
-    int client_fd = accept(server_fd, (struct sockaddr*) &client_address, &client_address_size);
-    if (client_fd == -1)
+    while (1)
     {
-        perror("[Error] Failed to accept connection.");
-        return 5;
+        client_fd = accept(server_fd, (struct sockaddr*) &client_address, &client_address_size);
+        if (client_fd == -1)
+        {
+            perror("[Error] Failed to accept connection.");
+            break;
+        }
+        printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
+
+        char message[REQUEST_MAX_BYTES];
+        ssize_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
+        if (message_bytes < 0)
+        {
+            perror("[Error] 0 bytes received from client.\n");
+            close_client_socket(client_fd);
+            break;
+        }
+
+        char *temp = message;
+        char *req = strtok_r(temp, "\r\n", &temp);
+        printf("Request Received: %s\n", req);
+
     }
-    printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
 
-    char *message = malloc(REQUEST_MAX_BYTES);
-    ssize_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
-
-    char *req = message;
-    char *tkn = strtok_r(req, "\r\n", &req);
-    printf("Request Received: %s\n", tkn);
-
-    free(message);
     sleep(2);
 
-    if (close(client_fd) == -1)
-    {
-        perror("[Error] Could not close client socket.");
-    }
-    printf("Client socket Closed.\n");
-
-    if (close(server_fd) == -1)
-    {
-        perror("[Error] Could not close server socket.");
-    }
-    printf("Server socket Closed.\n");
+    close_client_socket(client_fd);
+    close_server_socket(server_fd);
 
     return 0;
 }
