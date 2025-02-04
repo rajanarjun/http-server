@@ -6,16 +6,47 @@
 int process_response(int cfd, char *request_line)
 {
     char *token_ptr;
-    char *temp = request_line;
+    char *temp_line = request_line;
 
-    char *method = strtok_r(temp, " ", &token_ptr);
-    char *url = strtok_r(NULL, " ", &token_ptr);
+    char *method = strtok_r(temp_line, " ", &token_ptr);
+    char *uri = strtok_r(NULL, " ", &token_ptr);
     char *http_ver = strtok_r(NULL, " ", &token_ptr);
 
-    printf("Method: %s, URL: %s, HTTP Version: %s.\n", method, url, http_ver);
+    printf("Method: %s, URI: %s, HTTP Version: %s.\n", method, uri, http_ver);
+
+    if (check_method(method) == 0)
+    {
+        if (strcmp(method, "GET") != 0)
+        {
+            int code = 501;
+            printf("%d Not Implemented.\n", code);
+            return code;
+        }
+    }
+    else 
+    {
+        int code = 405;
+        printf("%d Method Not Allowed.\n", code);
+        return code;
+    }
+
+    if (uri[0] != '/')
+    {
+        int code = 400;
+        printf("%d Bad Request.\n", code);
+        return code;
+    }
+    if (strcmp(http_ver, "HTTP/1.1") != 0 && strcmp(http_ver, "HTTP/1.0") != 0)
+    {
+        int code = 505;
+        printf("%d HTTP Version Not Supported.\n", code);
+        return code;
+    }
+
+    //TODO: implement sending appropriate resp to request
+    //send_apt_response(char *uri);
     return 200;
 }
-
 
 
 char *index_html_response() {
