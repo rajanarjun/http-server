@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include "utilities.h"
 
+int send_apt_response(char *path);
+
 int process_response(int cfd, char *request_line)
 {
     char *token_ptr;
@@ -19,6 +21,7 @@ int process_response(int cfd, char *request_line)
         if (strcmp(method, "GET") != 0)
         {
             int code = 501;
+            //send_501_response(char *uri);
             printf("%d Not Implemented.\n", code);
             return code;
         }
@@ -29,7 +32,6 @@ int process_response(int cfd, char *request_line)
         printf("%d Method Not Allowed.\n", code);
         return code;
     }
-
     if (uri[0] != '/')
     {
         int code = 400;
@@ -43,11 +45,34 @@ int process_response(int cfd, char *request_line)
         return code;
     }
 
-    //TODO: implement sending appropriate resp to request
-    //send_apt_response(char *uri);
-    return 200;
+    int code = send_apt_response(uri);
+    return code;
 }
 
+int send_apt_response(char *path)
+{
+    const char *root_directory = "server_root";
+    if (strcmp(path, "/") == 0)
+    {
+        const char *requested_file = "/index.html";
+        char *full_path = malloc(strlen(root_directory) + strlen(requested_file) + 1);
+        strcpy(full_path, root_directory);
+        strcat(full_path, requested_file);
+        printf("Client requested: %s.\n", full_path);
+        free(full_path);
+        return 200;
+    }
+    else
+    {
+        const char *requested_file = path;
+        char *full_path = malloc(strlen(root_directory) + strlen(requested_file) + 1);
+        strcpy(full_path, root_directory);
+        strcat(full_path, requested_file);
+        printf("Client requested: %s.\n", full_path);
+        free(full_path);
+        return 2;
+    }
+}
 
 char *index_html_response() {
 
