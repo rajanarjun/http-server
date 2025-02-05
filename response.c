@@ -135,6 +135,7 @@ int send_apt_response(char *path)
 }
 
 //TODO:
+//Yeh saare error response ko ek hi function mei dalna hai, switch case use kar sakte hai
 //Need to actually send the file over socket
 void send_400_response()
 {
