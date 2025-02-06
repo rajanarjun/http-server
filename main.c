@@ -94,8 +94,7 @@ int main(int argc, char *argv[])
         char *req = strtok_r(temp, "\r\n", &temp);
         printf("Request Received: %s\n", req);
 
-        int status_code = process_response(client_fd, req);
-        printf("Response Sent: %d\n", status_code);
+        process_response(client_fd, req);
     }
 
     sleep(2);
