@@ -35,9 +35,7 @@ int process_response(int cfd, char *request_line)
     if (method == NULL || uri == NULL || http_ver == NULL)
     {
         code = 400;
-        send_400_response();
         printf("%d Bad Request.\n", code);
-        return code;
     }
 
     printf("Method: %s, URI: %s, HTTP Version: %s.\n", method, uri, http_ver);
@@ -47,26 +45,20 @@ int process_response(int cfd, char *request_line)
         if (strcmp(method, "GET") != 0)
         {
             code = 501;
-            //send_501_response();
             printf("%d Not Implemented.\n", code);
-            return code;
         }
     }
     else 
     {
         code = 405;
-        //send_405_response();
         printf("%d Method Not Allowed.\n", code);
-        return code;
     }
     
     //checking for http version, anything apart from 1.0 and 1.1 is 505
     if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
     {
         code = 505;
-        send_505_response();
         printf("%d HTTP Version Not Supported.\n", code);
-        return code;
     }
     
     //Dont need this block as '/' is added by default by browsers
@@ -74,9 +66,7 @@ int process_response(int cfd, char *request_line)
     if (uri[0] != '/')
     {
         code = 400;
-        send_400_response();
         printf("%d Bad Request: invalid start to path.\n", code);
-        return code;
     }
 
     //OH MY GOD THIS IS HELLL
@@ -84,18 +74,16 @@ int process_response(int cfd, char *request_line)
     //FML, FUCK RFC
     for (int i = 0; uri[i] != '\0'; i++)
     {
-        if ( uri[i] == ' ' || uri[i] == '\\' || !isprint(uri[i]) || ( (uri[i] == '%') && (!isxdigit(uri[i+1]) || !isxdigit(uri[i+1])) ) )
+        if ( uri[i] == '\\' || !isprint(uri[i]) || ( (uri[i] == '%') && (!isxdigit(uri[i+1]) || !isxdigit(uri[i+2])) ) )
         {
             code = 400;
-            send_400_response();
             printf("%d Bad Request: invalid character or percend-encoding in URI.\n", code);
-            return code;
         }
     }
     
-    //If all is good just serve the appropriate response
-    code = send_apt_response(uri);
-    return code;
+    send_apt_response(code, uri);
+    return code
+    
 }
 
 //To check if http method is valid
@@ -111,10 +99,25 @@ int check_method(char *method)
     return 1;
 }
 
-int send_apt_response(char *path)
+void send_apt_response(int status_code, char *path)
 {
-    const char *root_directory = "server_root";
+    const char *error_directory = "server_root/error";
     const char *requested_file;
+
+    switch (status_code)
+    {
+        case 400:
+            break;
+        case 404:
+            break;
+        case 405:
+            break;
+        case 501:
+            break;
+        case 505:
+            break;
+    }
+
 
     //ternary op syntax = condition ? expression_if_true : expression_if_false;
     requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
