@@ -15,17 +15,17 @@ This project gives an understanding of the HTTP protocol; how requests and respo
 - Handling concurrent connections
 - Multi-threaded request handling
 
-#### Directory Stucture
+#### Directory Stucture:
 To be added.
 
-#### Prequisites
+#### Prequisites:
 - GCC or Clang compiler
 - Make
  
-#### Build Instructions?
+#### Build Instructions:
 To be added.
 
-#### How to run the server?
+#### Running the server:
 To be added.
 
 
