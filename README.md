@@ -7,7 +7,7 @@ This project gives an understanding of the HTTP protocol; how requests and respo
 #### Current implementation:
 - Supports HTTP/1.0, HTTP/1.1
 - Handles GET requests
-- Servers static files (HTML, CSS, .jpg, .png, etc)
+- Serves static files (HTML, CSS, .jpg, .png, etc)
 - Custom error pages
 
 #### Future implementation to include:
