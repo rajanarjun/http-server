@@ -41,8 +41,7 @@ void process_response(int cfd, char *request_line)
     char *uri = strtok_r(NULL, " ", &token_ptr);
     char *http_ver = strtok_r(NULL, " ", &token_ptr);
 
-    //Forgot to check if these tokens could be null, and got segfault when testing,
-    //so added this check.
+    // tokens could be null
     if (method == NULL || uri == NULL || http_ver == NULL)
     {
         code = 400;
@@ -52,6 +51,7 @@ void process_response(int cfd, char *request_line)
 
     printf("Method: %s, URI: %s, HTTP Version: %s.\n", method, uri, http_ver);
 
+    // check if method if valid
     if (check_method(method) == 0)
     {
         if (strcmp(method, "GET") != 0)
@@ -68,7 +68,7 @@ void process_response(int cfd, char *request_line)
         printf("%d Method Not Allowed.\n", code);
     }
     
-    //checking for http version, anything apart from 1.0 and 1.1 is 505
+    // checking for http version, anything apart from 1.0 and 1.1 is 505
     if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
     {
         code = 505;
@@ -76,8 +76,8 @@ void process_response(int cfd, char *request_line)
         printf("%d HTTP Version Not Supported.\n", code);
     }
     
-    //Dont need this block as '/' is added by default by browsers
-    //but fuck it i am still checking it.
+    // Dont need this block as '/' is added by default by browsers
+    // but fuck it i am still checking it.
     if (uri[0] != '/')
     {
         code = 400;
@@ -85,12 +85,19 @@ void process_response(int cfd, char *request_line)
         printf("%d Bad Request: invalid start to path.\n", code);
     }
 
-    //OH MY GOD THIS IS HELLL
-    //Checking for control and non visible characters, backslashes and percent-encoding
-    //FML, FUCK RFC
+    // checking for dangerous path traversal. 
+    if (strstr(uri, "../") != NULL)
+    {
+        code = 400;
+        send_error_response(code);
+        printf("%d Bad Request: dangerous path traversal.\n", code);
+    }
+
+    // fml.
+    // checking for control ,non visible characters, and percent-encoding
     for (int i = 0; uri[i] != '\0'; i++)
     {
-        if ( uri[i] == '\\' || !isprint(uri[i]) || ( (uri[i] == '%') && (!isxdigit(uri[i+1]) || !isxdigit(uri[i+2])) ) )
+        if ( uri[i] == '\\' || ( (uri[i] == '%') && (!isxdigit(uri[i+1]) || !isxdigit(uri[i+2])) ) )
         {
             code = 400;
             send_error_response(code);
@@ -98,7 +105,7 @@ void process_response(int cfd, char *request_line)
         }
     }
     
-    send_apt_response(uri);
+    send_ok_response(uri);
 }
 
 void send_error_response(int error_code)
@@ -111,7 +118,7 @@ void send_error_response(int error_code)
     {
         case 400:
             requested_file = "400.html";
-            http_header = "HTTP/1.0 404 Bad Request.\r\n"
+            http_header = "HTTP/1.0 400 Bad Request.\r\n"
                               "Content-Type: text/html\r\n"
                               "Connection: close\r\n\r\n";
             break;
@@ -148,9 +155,12 @@ void send_error_response(int error_code)
     free(full_path);
 }
 
-void send_apt_response(char *path)
+void send_ok_response(char *path)
 {
     const char *root_directory = "server_root";
+    char *http_header = "HTTP/1.0 200 OK.\r\n"
+                  "Content-Type: %s\r\n"
+                  "Connection: close\r\n\r\n";
     const char *requested_file;
 
     requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
@@ -159,38 +169,22 @@ void send_apt_response(char *path)
     strcpy(full_path, root_directory);
     strcat(full_path, requested_file);
     printf("Client requested: %s.\n", full_path);
-    free(full_path);
 
-    // TODO:
-    // search for that file in server_root, if not present serve 404 else next step
-    // get file mime type from requested_file and generate http header and serve file, 200 OK
+    file_mime_type = get_mime_type(requested_file);
+
+
+    file_data = read_file(full_path);
+    if (file_data == NULL) 
+    {
+        send_error_response(404);
+    }
+    else
+    {
+        // TODO:serve header and file
+    }
+
+    free(full_path);
+    free(file_data);
 }
 
 
-//char* generate_image_header() {
-//    char *http_header = "HTTP/1.0 200 OK\r\n"
-//             "Content-Type: image/jpeg\r\n"
-//             "Connection: keep-alive\r\n\r\n";
-//    return http_header;
-//}
-//
-//char *greetings_response() {
-//
-//    FILE *image_file = fopen("server_root/greetings.jpg", "rb");
-//    if (image_file == NULL) {
-//        perror("Error opening file");
-//        return NULL;
-//    }
-//
-//    fseek(image_file, 0L, SEEK_END);
-//    unsigned long file_size = ftell(image_file);
-//    fseek(image_file, 0L, SEEK_SET);
-//
-//    char *image_data = (char *)malloc(file_size);
-//
-//    size_t bytes_read = fread(image_data, 1, file_size, image_file);
-//    fclose(image_file);
-//    
-//    return image_data;
-//
-//}

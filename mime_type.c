@@ -4,8 +4,17 @@
 #include <ctype.h>
 #include "utilities.h"
 
+#define DEFAULT_MIME_TYPE "text/html"
 
-//TODO:
-//implement function that gets mime type
-//for now extract extension
-//manually assign mime type to that extension
+char *get_mime_type(char *filename)
+{
+    char *file_ext = strchr(filename, '.');
+    if (file_ext == NULL) { return DEFAULT_MIME_TYPE; }
+
+    if (strcmp(file_ext, "html") == 0) { return "text/html"; }
+    if (strcmp(file_ext, "jpeg") == 0 || strcmp(file_ext, "jpg") == 0) { return "image/jpg"; }
+    if (strcmp(file_ext, "txt") == 0) { return "text/plain"; }
+    if (strcmp(file_ext, "png") == 0) { return "image/png"; }
+
+    return DEFAULT_MIME_TYPE;
+}
