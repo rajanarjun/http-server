@@ -2,11 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/socket.h>
 #include "utilities.h"
 
 #define TOKENS_LENGTH 8
 
-int send_apt_response(char *path);
+void send_ok_response(int cfd, char *path);
 void send_error_response(int error_code);
 
 char *METHOD_TOKENS[TOKENS_LENGTH] = {"OPTIONS", 
@@ -105,7 +106,7 @@ void process_response(int cfd, char *request_line)
         }
     }
     
-    send_ok_response(uri);
+    send_ok_response(cfd, uri);
 }
 
 void send_error_response(int error_code)
@@ -119,31 +120,36 @@ void send_error_response(int error_code)
         case 400:
             requested_file = "400.html";
             http_header = "HTTP/1.0 400 Bad Request.\r\n"
-                              "Content-Type: text/html\r\n"
+                              "Content-Type: %s\r\n"
+                              "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
             break;
         case 404:
             requested_file = "404.html"; 
             http_header = "HTTP/1.0 404 Not Found.\r\n"
-                              "Content-Type: text/html\r\n"
+                              "Content-Type: %s\r\n"
+                              "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
             break;
         case 405:
             requested_file = "405.html"; 
             http_header = "HTTP/1.0 405 Method Not Allowed.\r\n"
-                              "Content-Type: text/html\r\n"
+                              "Content-Type: %s\r\n"
+                              "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
             break;
         case 501:
             requested_file = "501.html"; 
             http_header = "HTTP/1.0 501 Not Implemened.\r\n"
-                              "Content-Type: text/html\r\n"
+                              "Content-Type: %s\r\n"
+                              "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
             break;
         case 505:
             requested_file = "505.html"; 
             http_header = "HTTP/1.0 505 HTTP Version Not Supported.\r\n"
-                              "Content-Type: text/html\r\n"
+                              "Content-Type: %s\r\n"
+                              "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
             break;
     }
@@ -155,36 +161,51 @@ void send_error_response(int error_code)
     free(full_path);
 }
 
-void send_ok_response(char *path)
+void send_ok_response(int cfd, char *path)
 {
     const char *root_directory = "server_root";
-    char *http_header = "HTTP/1.0 200 OK.\r\n"
-                  "Content-Type: %s\r\n"
-                  "Connection: close\r\n\r\n";
-    const char *requested_file;
-
-    requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
+    char *requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
+    char http_header[500];
 
     char *full_path = malloc(strlen(root_directory) + strlen(requested_file) + 1);
     strcpy(full_path, root_directory);
     strcat(full_path, requested_file);
     printf("Client requested: %s.\n", full_path);
 
-    file_mime_type = get_mime_type(requested_file);
-
-
-    file_data = read_file(full_path);
-    if (file_data == NULL) 
+    FILE *file_to_send = open_file(full_path);
+    if (file_to_send == NULL) 
     {
-        send_error_response(404);
+        /* send_error_response(404); */
+        printf("404 not found\n");
     }
     else
     {
-        // TODO:serve header and file
+        char *file_mime_type = get_mime_type(requested_file);
+        unsigned long file_size = get_file_size(file_to_send);
+
+        sprintf(http_header,
+                "HTTP/1.0 200 OK.\r\n"
+                  "Content-Type: %s\r\n"
+                  "Content-Length: %lu\r\n"
+                  "Connection: close\r\n\r\n",
+                  file_mime_type,
+                  file_size);
+    
+        /* printf("%s\n", http_header); */
+        /* printf("File mime type: %s\n", file_mime_type); */
+        /* printf("%ld\n", strlen(http_header)); */
+
+        // send header with all the info, then send the file
+        send(cfd, http_header, strlen(http_header), 0);
+
+        char *f_data = get_file_data(file_to_send, file_size);
+        send(cfd, f_data, file_size, 0);
+        free(f_data);
+
     }
 
     free(full_path);
-    free(file_data);
+    close_file(file_to_send);
 }
 
 

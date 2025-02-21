@@ -9,12 +9,15 @@
 char *get_mime_type(char *filename)
 {
     char *file_ext = strchr(filename, '.');
+    printf("%s\n", file_ext);
     if (file_ext == NULL) { return DEFAULT_MIME_TYPE; }
 
-    if (strcmp(file_ext, "html") == 0) { return "text/html"; }
-    if (strcmp(file_ext, "jpeg") == 0 || strcmp(file_ext, "jpg") == 0) { return "image/jpg"; }
-    if (strcmp(file_ext, "txt") == 0) { return "text/plain"; }
-    if (strcmp(file_ext, "png") == 0) { return "image/png"; }
+    if (strcmp(file_ext, ".html") == 0) { return "text/html"; }
+    if (strcmp(file_ext, ".jpeg") == 0 || strcmp(file_ext, ".jpg") == 0) { return "image/jpg"; }
+    if (strcmp(file_ext, ".txt") == 0) { return "text/plain"; }
+    if (strcmp(file_ext, ".png") == 0) { return "image/png"; }
 
-    return DEFAULT_MIME_TYPE;
+    if (strcmp(file_ext, ".ico") == 0) { return "image/x-icon"; }
+    
+    else { return DEFAULT_MIME_TYPE; }
 }
