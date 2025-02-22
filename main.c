@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        perror("[Error] Please port for the server");
+        perror("[Error] Please enter port for the server");
         return 1;
     }
    
