@@ -26,8 +26,7 @@ unsigned long get_file_size(FILE *opened_file)
 
 char *get_file_data(FILE *opened_file, unsigned long file_size)
 {
-    char *file_data = (char *)malloc(file_size);
-
+    char *file_data = malloc(file_size);
     size_t bytes_read = fread(file_data, 1, file_size, opened_file);
     
     return file_data;
