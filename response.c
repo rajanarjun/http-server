@@ -6,6 +6,7 @@
 #include "utilities.h"
 
 #define TOKENS_LENGTH 8
+#define HEADER_MAX_SIZE 8192
 
 void send_ok_response(int cfd, char *path);
 void send_error_response(int error_code);
@@ -165,7 +166,7 @@ void send_ok_response(int cfd, char *path)
 {
     const char *root_directory = "server_root";
     char *requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
-    char http_header[500];
+    char http_header[HEADER_MAX_SIZE];
 
     char *full_path = malloc(strlen(root_directory) + strlen(requested_file) + 1);
     strcpy(full_path, root_directory);
@@ -195,13 +196,13 @@ void send_ok_response(int cfd, char *path)
         /* printf("File mime type: %s\n", file_mime_type); */
         /* printf("%ld\n", strlen(http_header)); */
 
-        // send header with all the info, then send the file
+        // send the header with content type and length
         send(cfd, http_header, strlen(http_header), 0);
-
+        
+        // send the file
         char *f_data = get_file_data(file_to_send, file_size);
         send(cfd, f_data, file_size, 0);
         free(f_data);
-
     }
 
     free(full_path);
