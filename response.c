@@ -33,6 +33,30 @@ int check_method(char *method)
     return 1;
 }
 
+int check_slashes(const char *str) 
+{
+    int slash_count = 0;  
+    while (*str) 
+    {
+        if (*str == '/') 
+        {
+            if (slash_count) 
+            {
+                //printf("Error 400 Bad request.\n");
+                return 1;
+            }
+            slash_count = 1;
+        } else 
+        {
+            slash_count = 0;
+        }
+        str++;
+    }
+    return 0;
+    //printf("Valid string.\n");
+}
+
+
 void process_response(int cfd, char *request_line)
 {
     int code;
@@ -93,6 +117,13 @@ void process_response(int cfd, char *request_line)
         code = 400;
         send_error_response(cfd, code);
         printf("%d Bad Request: dangerous path traversal.\n", code);
+    }
+
+    if (check_slashes(uri) == 1)
+    {
+        code = 400;
+        send_error_response(cfd, code);
+        printf("%d Bad Request: consecutive slashes in path.\n", code);
     }
 
     // fml.

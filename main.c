@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
 
         char message[REQUEST_MAX_BYTES];
-        ssize_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
+        size_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
         if (message_bytes < 0)
         {
             perror("[Error] 0 bytes received from client.\n");
