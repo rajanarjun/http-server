@@ -33,6 +33,7 @@ int check_method(char *method)
     return 1;
 }
 
+// checking consecutive backslash
 int check_slashes(const char *str) 
 {
     int slash_count = 0;  
@@ -42,18 +43,19 @@ int check_slashes(const char *str)
         {
             if (slash_count) 
             {
-                //printf("Error 400 Bad request.\n");
+                //printf("Send 400, consecutive slashes found.\n");
                 return 1;
             }
             slash_count = 1;
-        } else 
+        } 
+        else 
         {
             slash_count = 0;
         }
+        // move pointer to next char
         str++;
     }
     return 0;
-    //printf("Valid string.\n");
 }
 
 
