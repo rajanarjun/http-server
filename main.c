@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
         char message[REQUEST_MAX_BYTES];
         size_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
-        if (message_bytes < 0)
+        if (message_bytes == 0)
         {
             perror("[Error] 0 bytes received from client.\n");
             close_client_socket(client_fd);
@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
         }
 
         char *temp = message;
-        char *req = strtok_r(temp, "\r\n", &temp);
+        char *temp_save_ptr;
+        char *req = strtok_r(temp, "\r\n", &temp_save_ptr);
         printf("Request Received: %s\n", req);
-
         process_response(client_fd, req);
     }
 
