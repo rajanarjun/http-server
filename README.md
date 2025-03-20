@@ -37,7 +37,17 @@ make all
 ```
 You can enter other port numbers apart from 8080.
 
-##### Cleaning build files:
+## Accessing the server
+##### Using a browser:
+http://localhost:8080
+
+##### Using curl:
+```sh
+curl http://localhost:8080
+```
+Note: When using curl, you will only see http responses from the server but not the actual static files. 
+
+#### Cleaning build files:
 ```sh
 make clean
 ```
