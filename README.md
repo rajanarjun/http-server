@@ -16,9 +16,13 @@ A lightweight HTTP server implemented in C. An interesting project to learn the 
 #### Prequisites:
 - GCC or Clang compiler
 - Make
+- Git
  
 #### Build Instructions:
-To be added.
+##### 1. Clone the repository:
+```sh
+git clone https://github.com/rajanarjun/http-server.git
+```
 
 #### Running the server:
 To be added.
