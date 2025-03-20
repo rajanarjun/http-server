@@ -13,16 +13,31 @@ A lightweight HTTP server implemented in C. An interesting project to learn the 
 - Handling concurrent connections
 - Multi-threaded request handling
 
-#### Prequisites:
+## Prequisites
 - GCC or Clang compiler
 - Make
 - Git
  
-#### Build Instructions:
+## Getting Started
 ##### 1. Clone the repository:
 ```sh
 git clone https://github.com/rajanarjun/http-server.git
 ```
+##### 2. Change into the project directory:
+```sh
+cd http-server
+```
+##### 3. Build the program:
+```sh
+make all
+```
+##### 4. Run the server:
+```sh
+./program 8080
+```
+You can enter other port numbers apart from 8080.
 
-#### Running the server:
-To be added.
+##### Cleaning build files:
+```sh
+make clean
+```
