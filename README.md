@@ -35,9 +35,11 @@ make all
 ```sh
 ./program 8080
 ```
-You can enter other port numbers apart from 8080.
+You can use any other port numbers apart from 8080.
 
 ## Accessing the server
+Use the same port number that was used when starting the server.
+
 ##### Using a browser:
 http://localhost:8080
 
@@ -45,7 +47,7 @@ http://localhost:8080
 ```sh
 curl http://localhost:8080
 ```
-Note: When using curl, you will only see http responses from the server but not the actual static files. 
+Note: When using curl, the output will be the file that was served ny the server based on the request. No route serves a static index.html.
 
 #### Cleaning build files:
 ```sh
