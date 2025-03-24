@@ -175,7 +175,7 @@ void send_error_response(int cfd, int error_code)
             break;
         case 501:
             requested_file = "501.html"; 
-            temp_header = "HTTP/1.0 501 Not Implemened.\r\n"
+            temp_header = "HTTP/1.0 501 Not Implemented.\r\n"
                               "Content-Type: %s\r\n"
                               "Content-Length: %d\r\n"
                               "Connection: close\r\n\r\n";
