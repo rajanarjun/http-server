@@ -11,14 +11,17 @@ Custom error pages for following error codes:
 ### 200 OK Response
 
 The welcome page at "/":
+
 ![200 OK](assets/response_200_index.png)
 
 ### 400 Bad Request
 
 For an invalid path like "////adcj":
+
 ![400 Bad Request](assets/response_400_invalid_path.png)
 
 ### 404 Not Found
 
 GET request for something thats not in the "server_root/" like "word.exe" in this example:
+
 ![404 Not Found](assets/response_404_not_found.png)
