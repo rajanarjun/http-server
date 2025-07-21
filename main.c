@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <sys/socket.h>
-#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <time.h>
 #include "utilities.h"
 
 #define REQUEST_MAX_BYTES 1024
@@ -90,7 +88,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        char *temp = message;
+        char *temp = &message[0];
         char *temp_save_ptr;
         char *req = strtok_r(temp, "\r\n", &temp_save_ptr);
         printf("Request Received: %s\n", req);
