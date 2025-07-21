@@ -1,55 +1,24 @@
-# HTTP server in C
-A lightweight HTTP server implemented in C. An interesting project to learn the C language and Hyper Text Transfer Protocol (HTTP). This project also gives an understanding of how HTML pages are shown on the web in accordance to RFC standards.
+## HTTP server
+Very basic HTTP server made in C using low level sockets. Handles GET requests, by serving static files (html, png, jpeg, etc).
 
-#### Current implementation:
-- Supports HTTP/1.0, HTTP/1.1
-- Handles GET requests
-- Serves static files (HTML, .jpg, .png, etc)
-- Custom error pages
-- Handles dangerous path traversals
+Custom error pages for following error codes:
+- 400 bad request
+- 404 not found
+- 405 method not allowed
+- 501 not implemented
+- 505 http version not supported
 
-#### Future implementation to try:
-- Basic logging
-- Handling concurrent connections
-- Multi-threaded request handling
+### 200 OK Response
 
-## Prequisites
-- GCC or Clang compiler
-- Make
-- Git
- 
-## Getting Started
-##### 1. Clone the repository:
-```sh
-git clone https://github.com/rajanarjun/http-server.git
-```
-##### 2. Change into the project directory:
-```sh
-cd http-server
-```
-##### 3. Build the program:
-```sh
-make all
-```
-##### 4. Run the server:
-```sh
-./program 8080
-```
-You can use any other port numbers apart from 8080.
+The welcome page at "/":
+![200 OK](assets/response_200_index.png)
 
-## Accessing the server
-Use the same port number that was used when starting the server.
+### 400 Bad Request
 
-##### Using a browser:
-http://localhost:8080
+For an invalid path like "////adcj":
+![400 Bad Request](assets/response_400_invalid_path.png)
 
-##### Using curl:
-```sh
-curl http://localhost:8080
-```
-Note: When using curl, the output will be the file that was served ny the server based on the request. No route serves a static index.html.
+### 404 Not Found
 
-#### Cleaning build files:
-```sh
-make clean
-```
+GET request for something thats not in the "server_root/" like "word.exe" in this example:
+![404 Not Found](assets/response_404_not_found.png)
