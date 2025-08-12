@@ -143,7 +143,7 @@ void process_response(int cfd, char *request_line)
     send_ok_response(cfd, uri);
 }
 
-void send_error_response(int cfd, int error_code)
+int send_error_response(int cfd, int error_code)
 {
     const char *error_directory = "server_root/error_pages/";
     char *requested_file;
@@ -190,6 +190,10 @@ void send_error_response(int cfd, int error_code)
     }
     
     char *full_path = malloc(strlen(error_directory) + strlen(requested_file) + 1);
+    if (full_path == NULL) {
+        printf("[Error] Could not allocate memory for uri path.\n");
+        return 1;
+    }
     strcpy(full_path, error_directory);
     strcat(full_path, requested_file);
 
@@ -198,6 +202,7 @@ void send_error_response(int cfd, int error_code)
     {
         free(full_path);
         perror("[Error] Custom error page not found\n");
+        return 2;
     }
     else
     {
@@ -221,16 +226,22 @@ void send_error_response(int cfd, int error_code)
         free(full_path);
         free(f_data);
         close_file(file_to_send);
+        return 0;
     }
 }
 
-void send_ok_response(int cfd, char *path)
+int send_ok_response(int cfd, char *path)
 {
     const char *root_directory = "server_root";
     char *requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
     char http_header[HEADER_MAX_SIZE];
 
     char *full_path = malloc(strlen(root_directory) + strlen(requested_file) + 1);
+    if (full_path == NULL) {
+        printf("[Error] Could not allocate memory for uri path.\n");
+        return 1;
+    }
+
     strcpy(full_path, root_directory);
     strcat(full_path, requested_file);
 
@@ -241,6 +252,7 @@ void send_ok_response(int cfd, char *path)
     {
         free(full_path);
         send_error_response(cfd, 404);
+        return 2;
     }
     else
     {
