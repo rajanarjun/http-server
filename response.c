@@ -65,7 +65,6 @@ int check_other_stuff(const char *str) {
     return 0;
 }
 
-
 int send_error_response(int cfd, int error_code)
 {
     const char *error_directory = "server_root/error_pages/";
@@ -207,6 +206,13 @@ int send_ok_response(int cfd, char *path)
     }
 }
 
+static void respond_error(int cfd, int err_code, const char *msg) {
+    if (send_error_response(cfd, err_code) != 0) {
+        printf("[Error] Unable to send error response.\n");
+    }
+    printf("%d %s\n", err_code, msg);
+}
+
 void process_response(int cfd, char *request_line)
 {
     int code;
@@ -220,94 +226,51 @@ void process_response(int cfd, char *request_line)
     // tokens could be null
     if (method == NULL || uri == NULL || http_ver == NULL)
     {
-        code = 400;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Bad Request.\n", code);
+        respond_error(cfd, 400, "Bad Request.");
+        return;
     }
-
     // check if method is valid
-    else if (check_method(method) == 1)
+    if (check_method(method) == 1)
     {
-        code = 405;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Method Not Allowed.\n", code);
-
+        respond_error(cfd, 405, "Method Not Allowed.");
+        return;
     }
-
     // check if method is GET, other methods not implemented yet
-    else if (strcmp(method, "GET") != 0)
+    if (strcmp(method, "GET") != 0)
     {
-        code = 501;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Not Implemented.\n", code);
+        respond_error(cfd, 501, "Not Implemented.");
+        return;
     }
-    
     // checking for http version, anything apart from 1.0 and 1.1 is 505
-    else if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
+    if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
     {
-        code = 505;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d HTTP Version Not Supported.\n", code);
+        respond_error(cfd, 505, "HTTP Version Not Supported.");
+        return;
     }
-    
-    // Dont need this block as '/' is added by default by browsers
-    // but fuck it i am still checking it.
-    else if (uri[0] != '/')
+    // Dont really need this block as '/' is added by default by browsers, but still
+    if (uri[0] != '/')
     {
-        code = 400;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Bad Request: invalid start to path.\n", code);
+        respond_error(cfd, 400, "Bad Request.");
+        return;
     }
-
-    // checking for dangerous path traversal. 
-    else if (strstr(uri, "../") != NULL)
+    // checking for path traversal. 
+    if (strstr(uri, "../") != NULL)
     {
-        code = 400;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Bad Request: dangerous path traversal.\n", code);
+        respond_error(cfd, 400, "Bad Request.");
+        return;
     }
-
     // checking for weird slashes or consecutive ones
-    else if (check_slashes(uri) == 1)
+    if (check_slashes(uri) == 1)
     {
-        code = 400;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Bad Request: consecutive slashes in path.\n", code);
+        respond_error(cfd, 400, "Bad Request.");
+        return;
     }
-
-    // fml.
     // checking for control ,non visible characters, and percent-encoding
-    else if (check_other_stuff(uri) == 1)
+    if (check_other_stuff(uri) == 1)
     {
-        code = 400;
-        int status = send_error_response(cfd, code);
-        if (status != 0) {
-            printf("[Error] Unable to send error response.\n");
-        }
-        printf("%d Bad Request: invalid character or percend-encoding in URI.\n", code);
+        respond_error(cfd, 400, "Bad Request.");
+        return;
     }
-    
     // all is good
     printf("Method: %s, URI: %s, HTTP Version: %s.\n", method, uri, http_ver);
     int status = send_ok_response(cfd, uri);
