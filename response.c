@@ -215,7 +215,6 @@ static void respond_error(int cfd, int err_code, const char *msg) {
 
 void process_response(int cfd, char *request_line)
 {
-    int code;
     char *token_ptr;
     char *temp_line = request_line;
 
