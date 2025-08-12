@@ -34,6 +34,7 @@ char *get_file_data(FILE *opened_file, unsigned long file_size)
     size_t bytes_read = fread(file_data, 1, file_size, opened_file);
     if (bytes_read == 0) {
         perror("[Error] Unable to open file.\n");
+        free(file_data);
         return NULL;
     }
     return file_data;
