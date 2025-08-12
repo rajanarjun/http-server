@@ -8,8 +8,8 @@
 #define TOKENS_LENGTH 8
 #define HEADER_MAX_SIZE 8192
 
-void send_ok_response(int cfd, char *path);
-void send_error_response(int cfd, int error_code);
+int send_error_response(int cfd, int error_code);
+int send_ok_response(int cfd, char *path);
 
 char *METHOD_TOKENS[TOKENS_LENGTH] = {"OPTIONS", 
                                       "GET",
@@ -73,7 +73,10 @@ void process_response(int cfd, char *request_line)
     if (method == NULL || uri == NULL || http_ver == NULL)
     {
         code = 400;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d Bad Request.\n", code);
     }
 
@@ -85,14 +88,20 @@ void process_response(int cfd, char *request_line)
         if (strcmp(method, "GET") != 0)
         {
             code = 501;
-            send_error_response(cfd, code);
+            int status = send_error_response(cfd, code);
+            if (status != 0) {
+                printf("[Error] Unable to send error response.\n");
+            }
             printf("%d Not Implemented.\n", code);
         }
     }
     else 
     {
         code = 405;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d Method Not Allowed.\n", code);
     }
     
@@ -100,7 +109,10 @@ void process_response(int cfd, char *request_line)
     if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
     {
         code = 505;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d HTTP Version Not Supported.\n", code);
     }
     
@@ -109,7 +121,10 @@ void process_response(int cfd, char *request_line)
     if (uri[0] != '/')
     {
         code = 400;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d Bad Request: invalid start to path.\n", code);
     }
 
@@ -117,14 +132,20 @@ void process_response(int cfd, char *request_line)
     if (strstr(uri, "../") != NULL)
     {
         code = 400;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d Bad Request: dangerous path traversal.\n", code);
     }
 
     if (check_slashes(uri) == 1)
     {
         code = 400;
-        send_error_response(cfd, code);
+        int status = send_error_response(cfd, code);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         printf("%d Bad Request: consecutive slashes in path.\n", code);
     }
 
@@ -135,12 +156,18 @@ void process_response(int cfd, char *request_line)
         if ( uri[i] == '\\' || ( (uri[i] == '%') && (!isxdigit(uri[i+1]) || !isxdigit(uri[i+2])) ) )
         {
             code = 400;
-            send_error_response(cfd, code);
+            int status = send_error_response(cfd, code);
+            if (status != 0) {
+                printf("[Error] Unable to send error response.\n");
+            }
             printf("%d Bad Request: invalid character or percend-encoding in URI.\n", code);
         }
     }
     
-    send_ok_response(cfd, uri);
+    int status = send_ok_response(cfd, uri);
+    if (status != 0) {
+        printf("[Error] Unable to send ok response.\n");
+    }
 }
 
 int send_error_response(int cfd, int error_code)
@@ -251,7 +278,10 @@ int send_ok_response(int cfd, char *path)
     if (file_to_send == NULL) 
     {
         free(full_path);
-        send_error_response(cfd, 404);
+        int status = send_error_response(cfd, 404);
+        if (status != 0) {
+            printf("[Error] Unable to send error response.\n");
+        }
         return 2;
     }
     else
@@ -277,6 +307,7 @@ int send_ok_response(int cfd, char *path)
         free(full_path);
         free(f_data);
         close_file(file_to_send);
+        return 0;
     }
 }
 
