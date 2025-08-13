@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "utilities.h"
+#include "mime_type.h"
 
 #define DEFAULT_MIME_TYPE "text/html"
 
-char *get_mime_type(char *filename)
+char *get_mime_type(const char *filename)
 {
     char *file_ext = strchr(filename, '.');
     if (file_ext == NULL) { return DEFAULT_MIME_TYPE; }
