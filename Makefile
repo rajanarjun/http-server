@@ -1,10 +1,15 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -Wpedantic
 
-all: program
+SRCS = file_info.c mime_type.c response.c main.c
 
-program: response.c main.c 
-	@gcc -Wall -Wextra -Wpedantic mime_type.c get_file.c response.c main.c -o server
+TARGET = server
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS) response.h file_info.h mime_type.h
+	$(CC) $(CFLAGS) -o $@ $(SRCS)
 
 clean:
 	@echo "Removing old binary"
-	@rm server
-
+	@rm -f $(TARGET)
