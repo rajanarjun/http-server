@@ -3,45 +3,61 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "file_info.h"
+#include "mime_type.h"
 
-FILE *open_file(char *file_path)
-{
-    FILE *file = fopen(file_path, "rb"); 
-    if (file == NULL) { 
+int load_file(const char *filename, const char *parent_directory, FileInfo *file) {
+
+    char *full_path = malloc(strlen(parent_directory) + strlen(filename) + 1);
+    if (full_path == NULL) {
+        printf("[Error] Could not allocate memory for uri path.\n");
+        return -1;
+    }
+    strcpy(full_path, parent_directory);
+    strcat(full_path, filename);
+
+    FILE *fp = fopen(full_path, "rb"); 
+    if (fp == NULL) { 
         perror("Send 404. File not found."); 
-        return NULL; 
+        free(full_path);
+        return -1; 
     } 
 
-    return file;
-}
+    fseek(fp, 0L, SEEK_END); 
+    unsigned long file_size = ftell(fp); 
+    fseek(fp, 0L, SEEK_SET); 
 
-unsigned long get_file_size(FILE *opened_file)
-{
-    fseek(opened_file, 0L, SEEK_END); 
-    unsigned long file_size = ftell(opened_file); 
-    fseek(opened_file, 0L, SEEK_SET); 
-
-    return file_size;
-}
-
-char *get_file_data(FILE *opened_file, unsigned long file_size)
-{
     char *file_data = malloc(file_size);
     if (file_data == NULL) {
         printf("[Error] Could not allocate memory for file data.\n");
-        return NULL;
+        free(full_path);
+        fclose(fp);
+        return -1;
     }
-    size_t bytes_read = fread(file_data, 1, file_size, opened_file);
-    if (bytes_read == 0) {
-        perror("[Error] Unable to open file.\n");
+    size_t bytes_read = fread(file_data, 1, file_size, fp);
+    fclose(fp);
+
+    if (bytes_read < (size_t)file_size) {
+        perror("[Error] Could not read file.\n");
+        free(full_path);
         free(file_data);
-        return NULL;
+        return -1;
     }
-    return file_data;
+
+    char *file_mime_type = get_mime_type(filename);
+
+    file->path = full_path;
+    file->size = file_size;
+    file->data = file_data;
+    file->mime_type = file_mime_type;
+
+    return 0;
 }
 
-void close_file(FILE *opened_file)
-{
-    fclose(opened_file);
-}
 
+void free_file(FileInfo *file) {
+    free(file->path);
+    free(file->data);
+    file->size = 0;
+    file->data = NULL;
+    file->mime_type = NULL;
+}
