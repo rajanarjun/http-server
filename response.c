@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <sys/socket.h>
-#include "utilities.h"
+#include "response.h"
 
 #define TOKENS_LENGTH 8
 #define HEADER_MAX_SIZE 8192
@@ -173,8 +173,7 @@ int send_ok_response(int cfd, char *path)
     if (file_to_send == NULL) 
     {
         free(full_path);
-        int status = send_error_response(cfd, 404);
-        if (status != 0) {
+        if (send_error_response(cfd, 404) != 0) {
             printf("[Error] Unable to send error response.\n");
         }
         return 2;
@@ -213,10 +212,11 @@ static void respond_error(int cfd, int err_code, const char *msg) {
     printf("%d %s\n", err_code, msg);
 }
 
-void process_response(int cfd, char *request_line)
+void process_response(int cfd, const char *request_line)
 {
     char *token_ptr;
-    char *temp_line = request_line;
+    char *temp_line = malloc(strlen(request_line) + 1);
+    strcpy(temp_line, request_line);
 
     char *method = strtok_r(temp_line, " ", &token_ptr);
     char *uri = strtok_r(NULL, " ", &token_ptr);
@@ -226,48 +226,56 @@ void process_response(int cfd, char *request_line)
     if (method == NULL || uri == NULL || http_ver == NULL)
     {
         respond_error(cfd, 400, "Bad Request.");
+        free(temp_line);
         return;
     }
     // check if method is valid
     if (check_method(method) == 1)
     {
         respond_error(cfd, 405, "Method Not Allowed.");
+        free(temp_line);
         return;
     }
     // check if method is GET, other methods not implemented yet
     if (strcmp(method, "GET") != 0)
     {
         respond_error(cfd, 501, "Not Implemented.");
+        free(temp_line);
         return;
     }
     // checking for http version, anything apart from 1.0 and 1.1 is 505
     if (strcmp(http_ver, "HTTP/1.0") != 0 && strcmp(http_ver, "HTTP/1.1") != 0)
     {
         respond_error(cfd, 505, "HTTP Version Not Supported.");
+        free(temp_line);
         return;
     }
     // Dont really need this block as '/' is added by default by browsers, but still
     if (uri[0] != '/')
     {
         respond_error(cfd, 400, "Bad Request.");
+        free(temp_line);
         return;
     }
     // checking for path traversal. 
     if (strstr(uri, "../") != NULL)
     {
         respond_error(cfd, 400, "Bad Request.");
+        free(temp_line);
         return;
     }
     // checking for weird slashes or consecutive ones
     if (check_slashes(uri) == 1)
     {
         respond_error(cfd, 400, "Bad Request.");
+        free(temp_line);
         return;
     }
     // checking for control ,non visible characters, and percent-encoding
     if (check_other_stuff(uri) == 1)
     {
         respond_error(cfd, 400, "Bad Request.");
+        free(temp_line);
         return;
     }
     // all is good
@@ -276,5 +284,6 @@ void process_response(int cfd, char *request_line)
     if (status != 0) {
         printf("[Error] Unable to send ok response.\n");
     }
+    free(temp_line);
 }
 
