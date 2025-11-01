@@ -59,8 +59,13 @@ http://localhost:8080/
 - Implement `HEAD` and `POST` methods
 - Unit tests for request parsing
 
+## Key Learnings
+- Low-level socket programming (TCP, HTTP)
+- Understanding RFC 2616 (HTTP/1.1)
+- String handling and parsing in C
+- Memory management and error handling
+
 ## License
 MIT License — see `LICENSE` file.
 
 *Note: The HTML pages contain images used for demonstration purposes only and are not covered under the MIT License.*
-
