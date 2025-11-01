@@ -71,7 +71,7 @@ int check_other_stuff(const char *str) {
 void send_error_response(int cfd, int error_code)
 {
     FileInfo file;
-    const char *error_directory = "server_root/error_pages/";
+    const char *error_directory = "../server_root/error_pages/";
     char *requested_file;
     char *temp_header;
 
@@ -146,7 +146,7 @@ void send_error_response(int cfd, int error_code)
 void send_ok_response(int cfd, char *path)
 {
     FileInfo file;
-    const char *root_directory = "server_root";
+    const char *root_directory = "../server_root";
     char *requested_file = (strcmp(path, "/") == 0) ?  "/index.html" : path;
 
     if (load_file(requested_file, root_directory, &file) != 0) {

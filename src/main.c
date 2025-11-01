@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
             break;
         }
 
+        printf("Request Received 1");
         char *temp = &message[0];
         char *temp_save_ptr;
         char *req = strtok_r(temp, "\r\n", &temp_save_ptr);
