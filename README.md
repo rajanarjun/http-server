@@ -1,4 +1,4 @@
-## HTTP server
+## HTTP Server
 A minimal HTTP/1.1 server written in C using POSIX sockets.
 Currently supports serving static files (HTML, PNG, JPEG, etc.) in response to **GET** requests.
 
