@@ -29,7 +29,7 @@ Invalid path example (`////adcj`):
 
 ![400 Bad Request](assets/response_400_invalid_path.png)
 
-### 🕳️ 404 Not Found
+### 404 Not Found
 Request for non-existent file (`word.exe`):
 
 ![404 Not Found](assets/response_404_not_found.png)
