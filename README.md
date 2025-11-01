@@ -61,3 +61,6 @@ http://localhost:8080/
 
 ## License
 MIT License — see `LICENSE` file.
+
+*Note: The HTML pages contain images used for demonstration purposes only and are not covered under the MIT License.*
+
