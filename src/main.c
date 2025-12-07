@@ -77,7 +77,16 @@ int main(int argc, char *argv[])
             perror("[Error] Failed to accept connection.");
             break;
         }
-        printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
+
+        /*
+        TODO:
+        put client fds into queue
+        create thread pool, assign task from queue to thread
+        loop over recv in a thread, connection: keep-alive
+        once done close client, give back thread to pool for other task
+        */
+
+        //printf("Accepted connection from address: %s.\n", inet_ntoa(client_address.sin_addr));
 
         char message[REQUEST_MAX_BYTES];
         size_t message_bytes = recv(client_fd, message, REQUEST_MAX_BYTES, 0);
@@ -88,12 +97,19 @@ int main(int argc, char *argv[])
             break;
         }
 
-        printf("Request Received 1");
+        // printf("%s\n", message);
+
+        // TODO:
+        // refactor this into a function
         char *temp = &message[0];
         char *temp_save_ptr;
         char *req = strtok_r(temp, "\r\n", &temp_save_ptr);
-        printf("Request Received: %s\n", req);
+
+        // printf("Request Received: %s\n", req);
+
         process_response(client_fd, req);
+
+        close_client_socket(client_fd);
     }
 
     sleep(2);
