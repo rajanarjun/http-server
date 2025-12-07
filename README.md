@@ -2,6 +2,8 @@
 A minimal HTTP/1.1 server written in C using POSIX sockets.
 Currently supports serving static files (HTML, PNG, JPEG, etc.) in response to **GET** requests.
 
+*Note:* Currently only single-threaded and handles only one client, check **Work in Progress** section for current development.
+
 ## Features
 - Handles **HTTP GET** requests
 - Serves static files from the server root directory
@@ -53,17 +55,10 @@ Then open your browser and navigate to:
 http://localhost:8080/
 ```
 
-## Planned Improvements
-- More GET responses apart from `index.html`
-- Support for multiple concurrent clients
-- Implement `HEAD` and `POST` methods
-- Unit tests for request parsing
-
-## Key Learnings
-- Low-level socket programming (TCP, HTTP)
-- Understanding RFC 2616 (HTTP/1.1)
-- String handling and parsing in C
-- Memory management and error handling
+## Work in Progress
+- Currently writing a new http parser (as much as I can make it HTTP/1.1 compliant) to replace the earlier minimal and naive toy version
+- An internal queue for handling accepted client file descriptors
+- Fixed size thread pool to allow concurrent request processing
 
 ## License
 MIT License — see `LICENSE` file.
